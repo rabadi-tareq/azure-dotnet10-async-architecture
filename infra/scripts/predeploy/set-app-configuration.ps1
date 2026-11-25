@@ -1,11 +1,11 @@
-<#
+﻿<#
 .SYNOPSIS
     This script will be run by the Azure Developer CLI, and will have access to the AZD_* vars
     This ensures the the app configuration service is reachable from the current environment.
 
 .DESCRIPTION
     This script will be run by the Azure Developer CLI, and will set the required
-    app configuration settings for the Relecloud web app as part of the code deployment process.
+    app configuration settings for the AsyncTickets web app as part of the code deployment process.
 
     Depends on the AZURE_RESOURCE_GROUP environment variable being set. AZD requires this to
     understand which resource group to deploy to so this script uses it to learn about the
@@ -71,7 +71,7 @@ function Get-WorkloadSqlManagedIdentityConnectionString {
 
     # the group contains tags that explain what the default name of the Azure SQL resource should be
     $sqlServerResourceName = "sql-$($group.Tags["ResourceToken"])"
-    $sqlDatabaseCatalogName = "relecloud-$($group.Tags["ResourceToken"])"
+    $sqlDatabaseCatalogName = "asynctickets-$($group.Tags["ResourceToken"])"
 
     # if sql server is not found, then throw an error
     if ($sqlServerResourceName.Length -lt 4) {
@@ -204,7 +204,7 @@ $defaultSqlConnectionString = (Get-WorkloadSqlManagedIdentityConnectionString -R
 $defaultAzureStorageTicketUri = (Get-WorkloadStorageAccount -ResourceGroupName $ResourceGroupName).PrimaryEndpoints.Blob # the URI of the storage account container where tickets are stored
 $defaultRedisConnectionString = (Get-WorkloadRedisManagedIdentityConnectionString -ResourceGroupname $ResourceGroupname) # the connection string to the redis database set with managed identity
 $defaultAzureFrontDoorHostName = $WebUri.Substring("https://".Length) # the hostname of the front door
-$defaultRelecloudBaseUri = "$WebUri/api" # used by the frontend to call the backend through the front door
+$defaultAsyncTicketsBaseUri = "$WebUri/api" # used by the frontend to call the backend through the front door
 $defaultKeyVaultUri = (Get-WorkloadKeyVault -ResourceGroupName $ResourceGroupName).VaultUri # the URI of the key vault where secrets are stored
 $defaultTicketRenderRequestQueueName = "ticket-render-requests" # matches the default defined in application-resources.bicep file
 $defaultTicketRenderCompleteQueueName = "ticket-render-completions" # matches the default defined in application-resources.bicep file
@@ -258,13 +258,13 @@ if ($azureFrontDoorHostName -eq "") {
     $azureFrontDoorHostName = $defaultAzureFrontDoorHostName
 }
 
-$relecloudBaseUri = ""
+$asyncticketsBaseUri = ""
 if (-not $NoPrompt) {
-    $relecloudBaseUri = Read-Host -Prompt "`nWhat value should be used for the Relecloud Base URI? [default: $highlightColor$defaultRelecloudBaseUri$defaultColor]"
+    $asyncticketsBaseUri = Read-Host -Prompt "`nWhat value should be used for the AsyncTickets Base URI? [default: $highlightColor$defaultAsyncTicketsBaseUri$defaultColor]"
 }
 
-if ($relecloudBaseUri -eq "") {
-    $relecloudBaseUri = $defaultRelecloudBaseUri
+if ($asyncticketsBaseUri -eq "") {
+    $asyncticketsBaseUri = $defaultAsyncTicketsBaseUri
 }
 
 $keyVaultUri = ""
@@ -337,7 +337,7 @@ Write-Host "`tSqlConnectionString: $highlightColor'$sqlConnectionString'$default
 Write-Host "`tRedisConnectionString: $highlightColor'$redisConnectionString'$defaultColor"
 Write-Host "`tAzureStorageTicketUri: $highlightColor'$azureStorageTicketUri'$defaultColor"
 Write-Host "`tAzureFrontDoorHostName: $highlightColor'$azureFrontDoorHostName'$defaultColor"
-Write-Host "`tRelecloudBaseUri: $highlightColor'$relecloudBaseUri'$defaultColor"
+Write-Host "`tAsyncTicketsBaseUri: $highlightColor'$asyncticketsBaseUri'$defaultColor"
 Write-Host "`tAzureServiceBusHost: $highlightColor'$azureServiceBusHost'$defaultColor"
 Write-Host "`tRenderRequestQueueName: $highlightColor'$ticketRenderRequestQueueName'$defaultColor"
 Write-Host "`tRenderCompleteQueueName: $highlightColor'$ticketRenderCompleteQueueName'$defaultColor"
@@ -365,7 +365,7 @@ try {
 
     Write-Host "Set values for frontend..."
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:FrontDoorHostname -Value $azureFrontDoorHostName > $null
-    Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:RelecloudApi:BaseUri -Value $relecloudBaseUri > $null
+    Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:AsyncTicketsApi:BaseUri -Value $asyncticketsBaseUri > $null
 
     Write-Host "Set values for redis..."
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:Redis:ConnectionString -Value $redisConnectionString > $null
@@ -374,7 +374,7 @@ try {
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key Api:MicrosoftEntraId:ClientId -Value "{ `"uri`":`"$($keyVaultUri)secrets/Api--MicrosoftEntraId--ClientId`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key Api:MicrosoftEntraId:Instance -Value "{ `"uri`":`"$($keyVaultUri)secrets/Api--MicrosoftEntraId--Instance`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key Api:MicrosoftEntraId:TenantId -Value "{ `"uri`":`"$($keyVaultUri)secrets/Api--MicrosoftEntraId--TenantId`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
-    Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:RelecloudApi:AttendeeScope -Value "{ `"uri`":`"$($keyVaultUri)secrets/App--RelecloudApi--AttendeeScope`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
+    Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key App:AsyncTicketsApi:AttendeeScope -Value "{ `"uri`":`"$($keyVaultUri)secrets/App--AsyncTicketsApi--AttendeeScope`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key MicrosoftEntraId:Instance -Value "{ `"uri`":`"$($keyVaultUri)secrets/MicrosoftEntraId--Instance`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key MicrosoftEntraId:CallbackPath -Value "{ `"uri`":`"$($keyVaultUri)secrets/MicrosoftEntraId--CallbackPath`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null
     Set-AzAppConfigurationKeyValue -Endpoint $configStore.Endpoint -Key MicrosoftEntraId:ClientId -Value "{ `"uri`":`"$($keyVaultUri)secrets/MicrosoftEntraId--ClientId`"}" -ContentType 'application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8' > $null

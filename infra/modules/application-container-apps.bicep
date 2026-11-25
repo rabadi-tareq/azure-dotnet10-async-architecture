@@ -1,8 +1,8 @@
-targetScope = 'resourceGroup'
+﻿targetScope = 'resourceGroup'
 
 /*
 ** An Azure Container App Environment with container apps necessary to
-** run Relecloud workloads.
+** run AsyncTickets workloads.
 ** Copyright (C) 2023 Microsoft, Inc.
 ** All Rights Reserved
 **

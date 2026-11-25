@@ -1,8 +1,8 @@
-targetScope = 'subscription'
+﻿targetScope = 'subscription'
 
 // ========================================================================
 //
-//  Relecloud Scenario of the Modern Web App (MWA)
+//  AsyncTickets Scenario of the Modern Web App (MWA)
 //  Infrastructure description
 //  Copyright (C) 2023 Microsoft, Inc.
 //

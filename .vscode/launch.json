@@ -1,4 +1,4 @@
-{
+﻿{
     "version": "0.2.0",
     "configurations": [
         {
@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/src/Relecloud.Web.CallCenter.Api/bin/Debug/net6.0/Relecloud.Web.CallCenter.Api.dll",
+            "program": "${workspaceFolder}/src/AsyncTickets.Web.CallCenter.Api/bin/Debug/net6.0/AsyncTickets.Web.CallCenter.Api.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/src/Relecloud.Web.CallCenter.Api",
+            "cwd": "${workspaceFolder}/src/AsyncTickets.Web.CallCenter.Api",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser
             "serverReadyAction": {

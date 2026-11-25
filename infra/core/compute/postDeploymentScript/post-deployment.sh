@@ -23,7 +23,7 @@ sudo apt-get -y update
 sudo apt-get install -y jq
 
 # install dotnet
-sudo apt-get install -y dotnet-sdk-8.0
+sudo apt-get install -y dotnet-sdk-10.0
 
 # install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash

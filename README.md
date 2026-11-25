@@ -1,10 +1,10 @@
-> **This repository is archived and no longer actively maintained.** It remains available in read-only mode for reference.
+﻿> **This repository is archived and no longer actively maintained.** It remains available in read-only mode for reference.
 >
 > For recommendations and best practices for modernizing your applications, we recommend [GitHub Copilot modernization](https://aka.ms/ghcp-modernization).
 
 # Modern Web App pattern for .NET
 
-The reference implementation provides a production-grade web application that uses best practices from our guidance and gives developers concrete examples to build their own Modern Web App in Azure. This repository specifically demonstrates a concert ticketing application for the fictional company Relecloud, embodying the Modern Web App pattern with a focus on .NET technologies. It guides developers through a simulated migration from an on-premises ASP.NET application to Azure, detailing the architectural changes and enhancements that capitalize on the cloud's strengths during the initial adoption phase.
+The reference implementation provides a production-grade web application that uses best practices from our guidance and gives developers concrete examples to build their own Modern Web App in Azure. This repository specifically demonstrates a concert ticketing application for the fictional company AsyncTickets, embodying the Modern Web App pattern with a focus on .NET technologies. It guides developers through a simulated migration from an on-premises ASP.NET application to Azure, detailing the architectural changes and enhancements that capitalize on the cloud's strengths during the initial adoption phase.
 
 This project has [a companion article in the Azure Architecture Center](https://aka.ms/eap/mwa/dotnet/doc) that describes design patterns and best practices. Here's an outline of the contents in this readme:
 
@@ -21,7 +21,7 @@ This project has a [companion article in the Azure Architecture Center](https://
 
 ## Architecture
 
-Relecloud aligned to a hub and spoke network topology in the production deployment architecture to centralize common resources. This network topology provided cost savings, enhanced security, and facilitated network integration (platform and hybrid):
+AsyncTickets aligned to a hub and spoke network topology in the production deployment architecture to centralize common resources. This network topology provided cost savings, enhanced security, and facilitated network integration (platform and hybrid):
 
 >[!WARNING]
 > **DEPRECATED:** [Azure Cache for Redis is retired](https://learn.microsoft.com/azure/azure-cache-for-redis/cache-retired-features). We will be updating this implementation to use [Azure Managed Redis](https://learn.microsoft.com/azure/redis/migrate/migrate-overview).
@@ -36,7 +36,7 @@ This diagram describes the production deployment which is described in the [prod
 
 ## Workflow
 
-This description details the workflow for Relecloud's concert ticketing application. It highlights key components and functionality to help you emulate its design:
+This description details the workflow for AsyncTickets's concert ticketing application. It highlights key components and functionality to help you emulate its design:
 
 - Global traffic routing: Azure Front Door acts as a global traffic manager, routing users to the primary region for optimal performance and failing over to a secondary region during outages for uninterrupted service.
 - Security inspection: Incoming traffic is inspected by Azure Web Application Firewall to protect against web vulnerabilities before reaching the web app.
@@ -49,7 +49,7 @@ This description details the workflow for Relecloud's concert ticketing applicat
    - The ticket rendering service will listen to the Service Bus queue for requests to render tickets.
    - When a request is received, the service will render the ticket and store it in Azure Blob Storage.
    - After rendering a ticket image, the ticket rendering service will queue a message into a different Service Bus queue to notify the backend web API that the ticket has been rendered.
-   - The web API listenes for incoming messages on the rendering complete Service Bus queue. When it receives a message, it updates the location of the ticket image in the database. Once this happens, users will be able to view their tickets in the Relecloud app.
+   - The web API listenes for incoming messages on the rendering complete Service Bus queue. When it receives a message, it updates the location of the ticket image in the database. Once this happens, users will be able to view their tickets in the AsyncTickets app.
 - Networking and access control: Azure Private DNS, Network Security Groups, and Azure Firewall tightly control the flow of traffic within the app's network, maintaining security and isolation.
 - Monitoring and telemetry: Application Insights provides monitoring and telemetry capabilities, enabling performance tracking and proactive issue resolution.
 - Configuration and secrets management: Initial configuration and sensitive information are loaded from Azure App Configuration and Azure Key Vault into the app's memory upon startup, minimizing access to sensitive data thereafter.

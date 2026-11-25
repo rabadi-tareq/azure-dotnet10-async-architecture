@@ -1,4 +1,4 @@
-targetScope = 'subscription'
+﻿targetScope = 'subscription'
 
 /*
 ** Application Infrastructure post-configuration
@@ -52,7 +52,7 @@ param readerIdentities object[]
 
 var microsoftEntraIdApiClientId = 'Api--MicrosoftEntraId--ClientId'
 var microsoftEntraIdApiInstance = 'Api--MicrosoftEntraId--Instance'
-var microsoftEntraIdApiScope = 'App--RelecloudApi--AttendeeScope'
+var microsoftEntraIdApiScope = 'App--AsyncTicketsApi--AttendeeScope'
 var microsoftEntraIdApiTenantId = 'Api--MicrosoftEntraId--TenantId'
 var microsoftEntraIdCallbackPath = 'MicrosoftEntraId--CallbackPath'
 var microsoftEntraIdClientId = 'MicrosoftEntraId--ClientId'

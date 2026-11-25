@@ -1,4 +1,4 @@
-# Troubleshooting
+﻿# Troubleshooting
 This document helps with troubleshooting MWA deployment challenges.
 
 ## Error: no project exists; to create a new project, run 'azd init'
@@ -65,14 +65,14 @@ This error message is displayed when the `dotnet` tool is not found in the $PATH
 
 **Full error message**
 ```sh
-ERROR: initializing service 'rendering-service', failed to initialize secrets at project '/home/azureadmin/web-app-pattern/src/Relecloud.TicketRenderer/Relecloud.TicketRenderer.csproj': exec: "dotnet": executable file not found in $PATH
+ERROR: initializing service 'rendering-service', failed to initialize secrets at project '/home/azureadmin/web-app-pattern/src/AsyncTickets.TicketRenderer/AsyncTickets.TicketRenderer.csproj': exec: "dotnet": executable file not found in $PATH
 ```
 
 ### Workaround
 
 1. Install the `dotnet` tool:
     ```sh
-    sudo apt-get install -y dotnet-sdk-8.0
+    sudo apt-get install -y dotnet-sdk-10.0
     ```
     > Full .NET Core SDK installation instructions can be found [here](https://learn.microsoft.com/dotnet/core/install/linux-ubuntu-2204).
 

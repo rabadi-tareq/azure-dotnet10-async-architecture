@@ -1,0 +1,19 @@
+﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Licensed under the MIT License.
+
+using Azure.Messaging.ServiceBus;
+
+namespace AsyncTickets.TicketRenderer.TestHelpers;
+
+public class TestServiceBusSender : ServiceBusSender
+{
+    public IList<ServiceBusMessage> SentMessages { get; } = [];
+
+    public override Task SendMessageAsync(ServiceBusMessage message, CancellationToken cancellationToken = default)
+    {
+        SentMessages.Add(message);
+        return Task.CompletedTask;
+    }
+
+    public override Task CloseAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+}

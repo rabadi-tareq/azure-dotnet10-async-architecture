@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://azuresdkreleasepreview.blob.core.windows.net/azd/schema/azure.yaml.json
+﻿# yaml-language-server: $schema=https://azuresdkreleasepreview.blob.core.windows.net/azd/schema/azure.yaml.json
 
 name: modern-csharp-web
 metadata:
@@ -45,15 +45,15 @@ hooks:
       run: ./infra/scripts/predown/call-cleanup.ps1
 services:
   web-callcenter-service:
-    project: src/Relecloud.Web.CallCenter.Api
+    project: src/AsyncTickets.Web.CallCenter.Api
     language: csharp
     host: appservice
   web-callcenter-frontend:
-    project: src/Relecloud.Web.CallCenter
+    project: src/AsyncTickets.Web.CallCenter
     language: csharp
     host: appservice
   rendering-service:
-    project: src/Relecloud.TicketRenderer
+    project: src/AsyncTickets.TicketRenderer
     language: dotnet
     host: containerapp
     apiVersion: 2024-02-02-preview # Force `azd` to use this API version for GET/PATCH operations

@@ -1,4 +1,4 @@
-# Developer Experience
+﻿# Developer Experience
 
 The dev team uses Visual Studio and they integrate directly with Azure resources when building the code. The team chooses this workflow to so they can integration test with Azure before their code reaches the QA team.
 
@@ -54,15 +54,15 @@ To support this workflow the following steps will store data in [User Secrets](h
 
 1. Switch to the front-end web app directory
     ```pwsh
-    cd src/Relecloud.Web.CallCenter
+    cd src/AsyncTickets.Web.CallCenter
     ```
 1. Clear any existing user secrets
     ```pwsh
     dotnet user-secrets clear
     ```
-1. Set the Relecloud API base URI
+1. Set the AsyncTickets API base URI
     ```pwsh
-    dotnet user-secrets set "App:RelecloudApi:BaseUri" "https://localhost:7242"
+    dotnet user-secrets set "App:AsyncTicketsApi:BaseUri" "https://localhost:7242"
     ```
 
 1. Set the Azure App Configuration URI
@@ -78,7 +78,7 @@ To support this workflow the following steps will store data in [User Secrets](h
 ## 2. Set up back-end web app configuration
 
     ```pwsh
-    cd src/Relecloud.Web.CallCenter.Api
+    cd src/AsyncTickets.Web.CallCenter.Api
     ```
 
     ```pwsh
@@ -93,9 +93,9 @@ To support this workflow the following steps will store data in [User Secrets](h
 
 1. Open the project in Visual Studio
 1. Configure the solution to start both the front-end and back-end web apps
-    1. Right-click the **Relecloud** solution and pick **Set Startup Projects...**
+    1. Right-click the **AsyncTickets** solution and pick **Set Startup Projects...**
     1. Choose **Multiple startup projects**
-    1. Change the dropdowns for *Relecloud.Web.CallCenter* and *Relecloud.Web.CallCenter.Api* to the action of **Start**.
+    1. Change the dropdowns for *AsyncTickets.Web.CallCenter* and *AsyncTickets.Web.CallCenter.Api* to the action of **Start**.
     1. Click **Ok** to close the popup
 
         ![screenshot of Visual Studio solution startup configuration](assets/images/configure-multiple-startup-projects.png)

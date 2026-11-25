@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Creates Microsoft Entra ID App Registrations for the call center web and api applications
     and saves the configuration data in App Configuration Svc and Key Vault.
@@ -48,7 +48,7 @@ Param(
 )
 
 $MAX_RETRY_ATTEMPTS = 10
-$API_SCOPE_NAME = "relecloud.api"
+$API_SCOPE_NAME = "asynctickets.api"
 
 # Prompt formatting features
 
@@ -502,8 +502,8 @@ if (!$apiPermission) {
 
 $formattedScope = "$($apiAppRegistration.IdentifierUri)/$($scopeDetails.Value)"
 $secretValue = ConvertTo-SecureString -String $formattedScope -AsPlainText -Force
-Set-AzKeyVaultSecret -VaultName $keyVault.VaultName -Name 'App--RelecloudApi--AttendeeScope' -SecretValue $secretValue -ErrorAction Stop > $null
-Write-Host "`tSaved the $highlightColor'App--RelecloudApi--AttendeeScope'$defaultColor to Key Vault"
+Set-AzKeyVaultSecret -VaultName $keyVault.VaultName -Name 'App--AsyncTicketsApi--AttendeeScope' -SecretValue $secretValue -ErrorAction Stop > $null
+Write-Host "`tSaved the $highlightColor'App--AsyncTicketsApi--AttendeeScope'$defaultColor to Key Vault"
 
 Write-Host "`nFinished create-app-registrations $($successColor)successfully$($defaultColor)."
 

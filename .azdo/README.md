@@ -1,4 +1,4 @@
-# Azure DevOps Pipeline Configuration
+﻿# Azure DevOps Pipeline Configuration
 
 This document will help you create an Azure DevOps pipeline that uses the Azure Developer CLI to deploy this sample.
 
@@ -68,7 +68,7 @@ The following steps walk-through creating the Azure Pipeline.
     |----|----|
     |AZURE_SUBSCRIPTION_ID| {find this GUID in the Azure Portal} |
     |AZURE_LOCATION| *eastus* |
-    |AZD_AZURE_ENV_NAME | *relecloudresources* |
+    |AZD_AZURE_ENV_NAME | *asyncticketsresources* |
 
 7. Click the `Run` button to start your first pipeline
 

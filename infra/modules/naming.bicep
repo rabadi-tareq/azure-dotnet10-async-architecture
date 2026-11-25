@@ -1,4 +1,4 @@
-targetScope = 'subscription'
+﻿targetScope = 'subscription'
 
 /*
 ** Resource Naming
@@ -107,7 +107,7 @@ var defaultResourceNames = {
   storageAccount: 'st${deploymentSettings.stage}${resourceToken}'
   storageAccountPrivateEndpoint: 'pep-st-${resourceToken}'
   storageAccountContainer: 'tickets'
-  sqlDatabase: 'relecloud-${resourceToken}'
+  sqlDatabase: 'asynctickets-${resourceToken}'
   sqlDatabasePrivateEndpoint: 'pep-sqldb-${resourceToken}'
   sqlServer: 'sql-${resourceToken}'
   sqlResourceGroup: '${resourceGroupPrefix}-application'

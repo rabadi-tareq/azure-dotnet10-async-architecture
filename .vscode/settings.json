@@ -1,3 +1,3 @@
-{
-    "dotnet.defaultSolution": "src/Relecloud.sln"
+﻿{
+    "dotnet.defaultSolution": "src/AsyncTickets.sln"
 }

@@ -1,10 +1,10 @@
-<#
+﻿<#
 .SYNOPSIS
     Sets the deployment up with one command.  This tries to be smart about
     what you want and does the provisioning and deployment steps in one
     command.
 .DESCRIPTION
-    When installing the Relecloud web app, you have to make many choices - are
+    When installing the AsyncTickets web app, you have to make many choices - are
     you running in network isolation mode?  Do you need a hub?  Would you like
     to save money by deploying with a common app service plan?  This script
     will prompt you for these choices and then deploy the infrastructure for
@@ -210,7 +210,7 @@ if ($Isolated -and $NoHub) {
 
 # Start of script
 
-Write-Host "Relecloud Application Setup" -ForegroundColor Yellow -BackgroundColor Black
+Write-Host "AsyncTickets Application Setup" -ForegroundColor Yellow -BackgroundColor Black
 
 $defaultEmailAddress = (Get-AzContext).Account.Id
 if (!$NoPrompt) {

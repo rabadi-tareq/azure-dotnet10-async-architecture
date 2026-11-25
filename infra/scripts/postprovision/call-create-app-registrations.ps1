@@ -1,11 +1,11 @@
-<#
+﻿<#
 .SYNOPSIS
     This script will be run by the Azure Developer CLI, and will have access to the AZD_* vars
     This calls the create app registration.ps1 with the correct AZD provisioned resource group.
 
 .DESCRIPTION
     This script will be run by the Azure Developer CLI, and will set the required
-    app configuration settings for the Relecloud web app as part of the code deployment process.
+    app configuration settings for the AsyncTickets web app as part of the code deployment process.
 
     Depends on the AZURE_RESOURCE_GROUP environment variable being set. AZD requires this to
     understand which resource group to deploy to so this script uses it to learn about the

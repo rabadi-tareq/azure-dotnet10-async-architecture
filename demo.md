@@ -1,4 +1,4 @@
-# Pattern Simulations
+﻿# Pattern Simulations
 
 You can test and configure the code-level design patterns introduced in this implementation: strangler fig, queue-based load leveling and competing consumers, and distributed tracing. The following paragraphs detail steps to test these code-level design patterns.
 
@@ -6,7 +6,7 @@ As an evolution of the Reliable Web App (RWA), the Modern Web App (MWA) referenc
 
 ## Strangler Fig pattern
 
-The strangler fig pattern is used to separate some functionality that was previously part of the Relecloud web API into a separate independently versionable and scalable service. Ticket rendering functionality is separated into a new service called the Ticket Rendering Service. We used an Azure App Configuration feature flag called `DistributedTicketRendering` that allows us to toggle between the old and new architectures (before and after applying the strangler fig pattern) for demo purposes.
+The strangler fig pattern is used to separate some functionality that was previously part of the AsyncTickets web API into a separate independently versionable and scalable service. Ticket rendering functionality is separated into a new service called the Ticket Rendering Service. We used an Azure App Configuration feature flag called `DistributedTicketRendering` that allows us to toggle between the old and new architectures (before and after applying the strangler fig pattern) for demo purposes.
 
 By default, the new ticket rendering service is used. To switch back and forth, follow these steps:
 
@@ -17,7 +17,7 @@ By default, the new ticket rendering service is used. To switch back and forth, 
         1. ![The DistributedTicketRendering feature flag disabled in Azure App Configuration](./assets/images/Guide/DisabledFeatureFlag.png)
     1. Wait for 30 seconds. The change will take effect without needing to restart or redeploy the web app but it takes about 30 seconds to propagate.
 1. Test purchasing a ticket.
-    1. Navigate to the Relecloud web app and purchase a ticket. You will notice that the ticket image is available immediately because it is rendered as part of the purchase operation. If you purchase many tickets at once, though (try using the browser developer tools to set quantity to 400), you will notice that the purchase operation takes longer because the ticket rendering is done synchronously.
+    1. Navigate to the AsyncTickets web app and purchase a ticket. You will notice that the ticket image is available immediately because it is rendered as part of the purchase operation. If you purchase many tickets at once, though (try using the browser developer tools to set quantity to 400), you will notice that the purchase operation takes longer because the ticket rendering is done synchronously.
     1. Go to the Azure Service Bus resource in the Azure Portal and notice in the metrics on the Overview blade that no messages have been received. The screenshot below shows the metrics for the Service Bus resource as seen on the Service Bus overview blade.
         1. ![The metrics for the Service Bus resource show no messages received](./assets/images/Guide/ServiceBusMetrics.png)
 1. Enable the `DistributedTicketRendering` feature flag.
@@ -26,7 +26,7 @@ By default, the new ticket rendering service is used. To switch back and forth, 
 1. Test purchasing a ticket.
     1. Navigate to the web app and purchase a ticket. This time, the ticket image might not be immediately available, especially if you purchased many tickets. Purchasing many tickets should not block showing the purchase confirmation screen, though, since ticket rendering is done asynchronously by a separate service now. If you check back after a short while (a few seconds), you will notice that the ticket images are available.
     1. Go to the Azure Service Bus resource and notice that messages have been received. This is because ticket rendering is now performed in a separate service from the web API and communication is done via Azure Service Bus.
-1. Finally, open the Relecloud solution and notice the new project called `Relecloud.TicketRenderer`. This is the new service that has been split from the original Relecloud web API according to the strangler fig pattern. This service can be maintained, versioned, deployed, and scaled independently from the original web API.
+1. Finally, open the AsyncTickets solution and notice the new project called `AsyncTickets.TicketRenderer`. This is the new service that has been split from the original AsyncTickets web API according to the strangler fig pattern. This service can be maintained, versioned, deployed, and scaled independently from the original web API.
 
 For more information, see [Strangler Fig pattern](https://learn.microsoft.com/azure/architecture/patterns/strangler-fig).
 
@@ -41,7 +41,7 @@ To see these patterns in action, follow these steps:
 1. Navigate to the Azure Container Apps resource in the Azure Portal and select the **Revisions and replicas** blade under the **Application** section in the menu on the left.
 1. Notice the replica count, probably 1 or 0 unless you've recently rendered a lot of tickets, as shown in the image below. You can click the **Show replicas** link to see the list of current replicas.
     1. ![The Revisions and replicas blade in the Azure Container Apps resource](./assets/images/Guide/AcaReplicaCount.png)
-1. Now, navigate to the Relecloud web app and purchase multiple tickets. You can use the browser developer tools to set the quantity to 400, for example. Notice that although you are shown the purchase confirmation page, the ticket images are not available immediately. According to the queue based load leveling pattern, the ticket rendering is done asynchronously so the web API is not blocked.
+1. Now, navigate to the AsyncTickets web app and purchase multiple tickets. You can use the browser developer tools to set the quantity to 400, for example. Notice that although you are shown the purchase confirmation page, the ticket images are not available immediately. According to the queue based load leveling pattern, the ticket rendering is done asynchronously so the web API is not blocked.
 1. After purchasing the tickets, navigate back to the Azure Container Apps resource and notice that the replica count has increased. This is because the ticket rendering service has automatically scaled out to handle the increased load based on the ticket rendering Service Bus queue length. These replicas will all work in parallel to process the tickets as quickly as possible.
     1. ![The Revisions and replicas blade in the Azure Container Apps resource showing increased replica count](./assets/images/Guide/AcaReplicaCountIncreased.png)
 1. After some time (about five minutes), you will notice that the number of replicas has decreased again. This is because the ticket rendering service has scaled in to minimize costs since the queue length has decreased.
@@ -56,7 +56,7 @@ We have implemented distributed tracing using [OpenTelemetry](https://learn.micr
 
 To see distributed tracing in action, follow these steps:
 
-1. Navigate to the Relecloud web app and purchase a ticket. This will cause a request to be sent to the web front end. The front end will call the web API which will then send a message to the ticket rendering service via Azure Service Bus. There are also multiple database updates along the way.
+1. Navigate to the AsyncTickets web app and purchase a ticket. This will cause a request to be sent to the web front end. The front end will call the web API which will then send a message to the ticket rendering service via Azure Service Bus. There are also multiple database updates along the way.
 1. Navigate to the Application Insights resource in the Azure Portal and select the **Transaction Search** blade. This will allow you to search recent traces.
 1. Search for "rendering". You should see some recent traces related to rendering activities, as shown below.
     1. ![The Transaction Search blade in the Application Insights resource](./assets/images/Guide/AiTransactionSearch.png)

@@ -1,6 +1,6 @@
-**Third-Party Package Dependencies for Relecloud**
+﻿**Third-Party Package Dependencies for AsyncTickets**
 
-The following third-party packages were added to the Relecloud solution. 
+The following third-party packages were added to the AsyncTickets solution. 
 
 | Package Name | Package Link                                               | License Type | License Link                                                                            | Purpose                                  | Date Added  |
 |--------------|------------------------------------------------------------|--------------|-----------------------------------------------------------------------------------------|------------------------------------------|--------------|
