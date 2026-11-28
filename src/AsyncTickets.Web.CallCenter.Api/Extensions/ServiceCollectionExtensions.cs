@@ -8,7 +8,9 @@ using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FeatureManagement;
 using Microsoft.Identity.Web;
+using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using AsyncTickets.Messaging.ServiceBus;
 using AsyncTickets.Models.Services;
@@ -31,8 +33,17 @@ public static class ServiceCollectionExtensions
     {
         var azureCredential = GetAzureCredential(configuration);
 
-        // Adds Microsoft Identity platform support to protect this API.
-        services.AddMicrosoftIdentityWebApiAuthentication(configuration, "Api:MicrosoftEntraId");
+        if (configuration.GetValue<bool>("App:UseLocalEmulators"))
+        {
+            // Local emulator mode: no Microsoft Entra ID tenant is needed.
+            services.AddAuthentication(LocalDevAuthenticationHandler.SchemeName)
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, LocalDevAuthenticationHandler>(LocalDevAuthenticationHandler.SchemeName, _ => { });
+        }
+        else
+        {
+            // Adds Microsoft Identity platform support to protect this API.
+            services.AddMicrosoftIdentityWebApiAuthentication(configuration, "Api:MicrosoftEntraId");
+        }
 
         services.AddControllers();
 
@@ -49,6 +60,10 @@ public static class ServiceCollectionExtensions
         if (configuration["App:ApplicationInsights:ConnectionString"] is string appInsightsConnectionString)
         {
             services.AddCallCenterApiOpenTelemetry(appInsightsConnectionString);
+        }
+        else if (configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] is { Length: > 0 })
+        {
+            services.AddCallCenterApiOtlpTelemetry();
         }
 
         services.AddAzureServiceBusMessageBus("App:ServiceBus", azureCredential);
@@ -144,7 +159,10 @@ public static class ServiceCollectionExtensions
             {
                 var configurationOptions = ConfigurationOptions.Parse(redisCacheConnectionString);
 
-                configurationOptions.ConfigureForAzureWithTokenCredentialAsync(token).GetAwaiter().GetResult();
+                if (!redisCacheConnectionString.Contains("localhost", StringComparison.OrdinalIgnoreCase))
+                {
+                    configurationOptions.ConfigureForAzureWithTokenCredentialAsync(token).GetAwaiter().GetResult();
+                }
 
                 options.ConfigurationOptions = configurationOptions;
             });
@@ -160,11 +178,41 @@ public static class ServiceCollectionExtensions
         // It is best practice to create Azure SDK clients once and reuse them.
         // https://learn.microsoft.com/azure/storage/blobs/storage-blob-client-management#manage-client-objects
         // https://devblogs.microsoft.com/azure-sdk/lifetime-management-and-thread-safety-guarantees-of-azure-sdk-net-clients/
+        var storageConnectionString = configuration["App:StorageAccount:ConnectionString"];
+        if (!string.IsNullOrWhiteSpace(storageConnectionString))
+        {
+            services.AddSingleton<ITicketImageService, TicketImageService>();
+            services.AddSingleton(_ => new BlobServiceClient(storageConnectionString));
+            return;
+        }
+
         var storageAccountUri = configuration["App:StorageAccount:Uri"]
             ?? throw new InvalidOperationException("Required configuration missing. Could not find App:StorageAccount:Uri setting.");
 
         services.AddSingleton<ITicketImageService, TicketImageService>();
         services.AddSingleton(_ => new BlobServiceClient(new Uri(storageAccountUri), token));
+    }
+
+    private static void AddCallCenterApiOtlpTelemetry(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("AsyncTickets.Web.CallCenter.Api"))
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRuntimeInstrumentation()
+                       .AddOtlpExporter();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRedisInstrumentation()
+                       .AddSqlClientInstrumentation()
+                       .AddSource("Azure.*")
+                       .AddOtlpExporter();
+            });
     }
 
     private static void AddCallCenterApiOpenTelemetry(this IServiceCollection services, string appInsightsConnectionString)

@@ -12,7 +12,9 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.TokenCacheProviders.Distributed;
 using Microsoft.Identity.Web.UI;
 using Microsoft.Net.Http.Headers;
+using OpenTelemetry;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Polly;
 using AsyncTickets.Models.ConcertContext;
@@ -44,6 +46,12 @@ public static class ServiceCollectionExtensions
             // Azure Monitor OpenTelemetry distro.
             services.AddApplicationInsightsTelemetry(o => o.ConnectionString = appInsightsConnectionString);
             services.AddCallCenterWebOpenTelemetry(appInsightsConnectionString);
+        }
+        else if (configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] is { Length: > 0 })
+        {
+            services.AddCallCenterWebOtlpTelemetry();
+            services.AddSingleton(new Microsoft.ApplicationInsights.TelemetryClient(
+                new Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration { DisableTelemetry = true }));
         }
 
         var baseUri = configuration["App:AsyncTicketsApi:BaseUri"];
@@ -136,6 +144,16 @@ public static class ServiceCollectionExtensions
             });
         });
 
+        if (configuration.GetValue<bool>("App:UseLocalEmulators"))
+        {
+            // Local emulator mode: no Microsoft Entra ID tenant is needed.
+            services.AddAuthentication(LocalDevAuthenticationHandler.SchemeName)
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, LocalDevAuthenticationHandler>(LocalDevAuthenticationHandler.SchemeName, _ => { });
+            services.AddScoped<ITokenAcquisition, LocalDevTokenAcquisition>();
+            services.AddDistributedMemoryCache();
+            return;
+        }
+
         var builder = services.AddMicrosoftIdentityWebAppAuthentication(configuration, "MicrosoftEntraId")
             .EnableTokenAcquisitionToCallDownstreamApi([])
             .AddDownstreamWebApi("asynctickets-api", configuration.GetSection("GraphBeta"));
@@ -191,6 +209,26 @@ public static class ServiceCollectionExtensions
                 };
             });
         }
+    }
+
+    private static void AddCallCenterWebOtlpTelemetry(this IServiceCollection services)
+    {
+        services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService("AsyncTickets.Web.CallCenter"))
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRuntimeInstrumentation()
+                       .AddOtlpExporter();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRedisInstrumentation()
+                       .AddOtlpExporter();
+            });
     }
 
     private static void AddCallCenterWebOpenTelemetry(this IServiceCollection services, string appInsightsConnectionString)

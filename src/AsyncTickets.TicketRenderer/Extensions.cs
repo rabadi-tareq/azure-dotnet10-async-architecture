@@ -1,10 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT License.
 
 using Azure.Core;
 using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.Extensions.Azure;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using AsyncTickets.Messaging.ServiceBus;
 using AsyncTickets.TicketRenderer.Models;
@@ -75,15 +78,22 @@ internal static class Extensions
             var storageOptions = builder.Configuration.GetRequiredSection("App:StorageAccount").Get<AzureStorageOptions>()
                 ?? throw new InvalidOperationException("Storage options (App:StorageAccount) not found");
 
-            if (storageOptions.Uri is null)
+            if (string.IsNullOrWhiteSpace(storageOptions.Uri) && string.IsNullOrWhiteSpace(storageOptions.ConnectionString))
             {
-                throw new InvalidOperationException("Storage options (App:StorageAccount:Uri) not found");
+                throw new InvalidOperationException("Storage options (App:StorageAccount:Uri or ConnectionString) not found");
             }
 
             var resilienceOptions = builder.Configuration.GetSection("App:Resilience").Get<ResilienceOptions>()
                 ?? new ResilienceOptions();
 
-            clientConfiguration.AddBlobServiceClient(new Uri(storageOptions.Uri));
+            if (!string.IsNullOrWhiteSpace(storageOptions.ConnectionString))
+            {
+                clientConfiguration.AddBlobServiceClient(storageOptions.ConnectionString);
+            }
+            else
+            {
+                clientConfiguration.AddBlobServiceClient(new Uri(storageOptions.Uri!));
+            }
 
             // ConfigureDefaults sets standard retry policies for all HTTP-based Azure clients.
             // Note that this is not the same as the AddStandardResilienceHandler in ConfigureHttpClientDefaults
@@ -99,6 +109,41 @@ internal static class Extensions
 
             });
         });
+    }
+
+    public static IHealthChecksBuilder AddServiceBusQueueHealthCheck(this IHealthChecksBuilder healthChecks, IConfiguration configuration, TokenCredential credential)
+    {
+        var queueName = configuration.GetRequiredConfigurationValue("App:ServiceBus:RenderRequestQueueName");
+        return configuration["App:ServiceBus:ConnectionString"] is { Length: > 0 } connectionString
+            ? healthChecks.AddAzureServiceBusQueue(connectionString, queueName)
+            : healthChecks.AddAzureServiceBusQueue(configuration.GetRequiredConfigurationValue("App:ServiceBus:Host"), queueName, credential);
+    }
+
+    public static void AddOtlpTelemetry(this IHostApplicationBuilder builder)
+    {
+        builder.Logging.AddOpenTelemetry(o =>
+        {
+            o.IncludeFormattedMessage = true;
+            o.IncludeScopes = true;
+            o.AddOtlpExporter();
+        });
+
+        builder.Services.AddOpenTelemetry()
+            .ConfigureResource(r => r.AddService(builder.Environment.ApplicationName))
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddRuntimeInstrumentation()
+                       .AddOtlpExporter();
+            })
+            .WithTracing(tracing =>
+            {
+                tracing.AddAspNetCoreInstrumentation()
+                       .AddHttpClientInstrumentation()
+                       .AddSource("Azure.*")
+                       .AddOtlpExporter();
+            });
     }
 
     public static void AddTelemetry(this IHostApplicationBuilder builder, string appInsightsConnectionString)

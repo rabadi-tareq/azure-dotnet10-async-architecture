@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT License.
 
 using Azure.Storage.Blobs;
@@ -14,7 +14,14 @@ internal class AzureImageStorage(ILogger<AzureImageStorage> logger, BlobServiceC
 {
     public async Task<bool> StoreImageAsync(Stream image, string path, CancellationToken cancellationToken)
     {
-        var blobClient = blobServiceClient.GetBlobContainerClient(options.CurrentValue.Container).GetBlobClient(path);
+        var containerClient = blobServiceClient.GetBlobContainerClient(options.CurrentValue.Container);
+        if (!string.IsNullOrWhiteSpace(options.CurrentValue.ConnectionString))
+        {
+            // Local emulator mode (Azurite): the container isn't provisioned by IaC, so create it on demand.
+            await containerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+        }
+
+        var blobClient = containerClient.GetBlobClient(path);
         var response = await blobClient.UploadAsync(image, overwrite: true, cancellationToken);
 
         if (response.GetRawResponse().IsError)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT License.
 
 using Azure.Core;
@@ -43,8 +43,17 @@ public static class AzureServiceBusMessageBusExtensions
                 }
             };
 
-            return new ServiceBusClient(options.Host, azureCredential ?? new DefaultAzureCredential(), clientOptions);
-        });
+            if (!string.IsNullOrWhiteSpace(options.ConnectionString))
+            {
+                return new ServiceBusClient(options.ConnectionString, clientOptions);
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Host))
+            {
+                throw new OptionsValidationException(nameof(MessageBusOptions), typeof(MessageBusOptions), ["Either Host or ConnectionString must be set."]);
+            }
+
+            return new ServiceBusClient(options.Host, azureCredential ?? new DefaultAzureCredential(), clientOptions);        });
 
         return services;
     }

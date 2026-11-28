@@ -3,15 +3,17 @@
 
 using Azure.Identity;
 using Microsoft.IdentityModel.Logging;
+using OpenTelemetry.Logs;
 using AsyncTickets.Web.Api.Extensions;
 using AsyncTickets.Web.Api.Infrastructure;
 using AsyncTickets.Web.CallCenter.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var hasRequiredConfigSettings = !string.IsNullOrEmpty(builder.Configuration["App:AppConfig:Uri"]);
+var hasAppConfigUri = !string.IsNullOrEmpty(builder.Configuration["App:AppConfig:Uri"]);
+var hasRequiredConfigSettings = hasAppConfigUri || builder.Configuration.GetValue<bool>("App:UseLocalEmulators");
 
-if (hasRequiredConfigSettings)
+if (hasAppConfigUri)
 {
     builder.Configuration.AddAzureAppConfiguration(options =>
     {
@@ -35,6 +37,11 @@ builder.Logging.AddOpenTelemetry(o =>
 {
     o.IncludeFormattedMessage = true;
     o.IncludeScopes = true;
+    if (!string.IsNullOrEmpty(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"])
+        && string.IsNullOrEmpty(builder.Configuration["App:ApplicationInsights:ConnectionString"]))
+    {
+        o.AddOtlpExporter();
+    }
 });
 
 if (builder.Environment.IsDevelopment())
@@ -55,7 +62,10 @@ var app = builder.Build();
 if (hasRequiredConfigSettings)
 {
     // Allows refreshing configuration values from Azure App Configuration
-    app.UseAzureAppConfiguration();
+    if (hasAppConfigUri)
+    {
+        app.UseAzureAppConfiguration();
+    }
 
     if (app.Environment.IsDevelopment())
     {

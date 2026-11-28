@@ -8,9 +8,10 @@ using AsyncTickets.Web.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 var azureCredential = new DefaultAzureCredential();
 
-var hasRequiredConfigSettings = !string.IsNullOrEmpty(builder.Configuration["App:AppConfig:Uri"]);
+var hasRequiredConfigSettings = !string.IsNullOrEmpty(builder.Configuration["App:AppConfig:Uri"])
+    || builder.Configuration.GetValue<bool>("App:UseLocalEmulators");
 
-if (hasRequiredConfigSettings)
+if (!string.IsNullOrEmpty(builder.Configuration["App:AppConfig:Uri"]))
 {
     builder.Configuration.AddAzureAppConfiguration(options =>
     {
@@ -46,7 +47,8 @@ if (hasRequiredConfigSettings)
     builder.Services.AddCallCenterWebServices(builder.Configuration, azureCredential);
 }
 
-var hasMicrosoftEntraIdSettings = !string.IsNullOrEmpty(builder.Configuration["MicrosoftEntraId:ClientId"]);
+var hasMicrosoftEntraIdSettings = !string.IsNullOrEmpty(builder.Configuration["MicrosoftEntraId:ClientId"])
+    || builder.Configuration.GetValue<bool>("App:UseLocalEmulators");
 
 var app = builder.Build();
 

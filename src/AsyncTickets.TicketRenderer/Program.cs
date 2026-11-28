@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT License.
 
 using Azure.Core;
@@ -30,6 +30,10 @@ if (builder.Configuration["App:ApplicationInsights:ConnectionString"] is string 
 {
     builder.AddTelemetry(appInsightsConnectionString);
 }
+else if (builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] is { Length: > 0 })
+{
+    builder.AddOtlpTelemetry();
+}
 builder.AddAzureServices(azureCredentials);
 builder.AddTicketRenderingServices();
 
@@ -43,10 +47,7 @@ builder.Services.AddHealthChecks()
         // We just need to specify the container name
         options.ContainerName = builder.Configuration.GetRequiredConfigurationValue("App:StorageAccount:Container");
     })
-    .AddAzureServiceBusQueue(
-        builder.Configuration.GetRequiredConfigurationValue("App:ServiceBus:Host"),
-        builder.Configuration.GetRequiredConfigurationValue("App:ServiceBus:RenderRequestQueueName"),
-        azureCredentials);
+    .AddServiceBusQueueHealthCheck(builder.Configuration, azureCredentials);
 
 builder.Services.ConfigureHttpClientDefaults(httpConfiguration =>
 {

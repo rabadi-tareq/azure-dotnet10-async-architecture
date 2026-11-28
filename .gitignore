@@ -361,3 +361,7 @@ MigrationBackup/
 # Connection files
 az_ssh_config/
 ssh-config
+
+# Local emulator profile secrets
+local/.env
+local/*.log

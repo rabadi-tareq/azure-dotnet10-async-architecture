@@ -1,0 +1,37 @@
+﻿{
+    "UserConfig":  {
+                       "Logging":  {
+                                       "Type":  "File"
+                                   },
+                       "Namespaces":  [
+                                          {
+                                              "Name":  "sbemulatorns",
+                                              "Queues":  [
+                                                             {
+                                                                 "Properties":  {
+                                                                                    "DefaultMessageTimeToLive":  "PT1H",
+                                                                                    "LockDuration":  "PT1M",
+                                                                                    "RequiresDuplicateDetection":  false,
+                                                                                    "RequiresSession":  false,
+                                                                                    "MaxDeliveryCount":  10,
+                                                                                    "DeadLetteringOnMessageExpiration":  false
+                                                                                },
+                                                                 "Name":  "ticket-render-requests"
+                                                             },
+                                                             {
+                                                                 "Properties":  {
+                                                                                    "DefaultMessageTimeToLive":  "PT1H",
+                                                                                    "LockDuration":  "PT1M",
+                                                                                    "RequiresDuplicateDetection":  false,
+                                                                                    "RequiresSession":  false,
+                                                                                    "MaxDeliveryCount":  10,
+                                                                                    "DeadLetteringOnMessageExpiration":  false
+                                                                                },
+                                                                 "Name":  "ticket-render-completions"
+                                                             }
+                                                         ]
+                                          }
+                                      ]
+                   }
+}
+

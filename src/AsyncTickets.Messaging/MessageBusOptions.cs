@@ -1,14 +1,25 @@
-﻿// Copyright (c) Microsoft Corporation. All Rights Reserved.
+// Copyright (c) Microsoft Corporation. All Rights Reserved.
 // Licensed under the MIT License.
 
 using System.ComponentModel.DataAnnotations;
 
 namespace AsyncTickets.Messaging;
 
-public class MessageBusOptions
+public class MessageBusOptions : IValidatableObject
 {
-    [Required]
+    // Required unless ConnectionString is set.
     public string? Host { get; set; }
+
+    // Optional. When set (for example with the local emulator), it is used instead of Host and the token credential.
+    public string? ConnectionString { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(Host) && string.IsNullOrWhiteSpace(ConnectionString))
+        {
+            yield return new ValidationResult("Either Host or ConnectionString must be set.", [nameof(Host)]);
+        }
+    }
 
     [Required]
     public string? RenderRequestQueueName { get; set; }
